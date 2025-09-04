@@ -44,8 +44,6 @@ public class UserService {
     return userMapper.toDto(userRepository.save(user));
   }
 
-
-
   private void validateEmailDoesNotExist(String email) {
     if (userRepository.existsByEmail(email)) {
       throw new UserEmailDuplicatedException(UserErrorCode.USER_EMAIL_DUPLICATED, email);
