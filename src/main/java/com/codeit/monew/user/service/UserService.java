@@ -52,7 +52,7 @@ public class UserService {
 
     String loginPassword = userLoginRequest.password();
 
-    if(matches(loginPassword, user.getPassword())) {
+    if(!matches(loginPassword, user.getPassword())) {
       throw new UserLoginFailedException(UserErrorCode.USER_LOGIN_FAILED);
     }
 
