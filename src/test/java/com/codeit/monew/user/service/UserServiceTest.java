@@ -113,11 +113,10 @@ public class UserServiceTest {
   }
 
   private static User createUser() {
-    String password = "password";
     return User.builder()
         .email("email@email.com")
         .nickname("nickname")
-        .password(BCrypt.withDefaults().hashToString(12, password.toCharArray()))
+        .password("password")
         .userStatus(UserStatus.ACTIVE)
         .build();
   }

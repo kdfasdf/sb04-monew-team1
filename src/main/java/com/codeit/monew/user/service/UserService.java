@@ -4,9 +4,11 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 import com.codeit.monew.user.entity.User;
 import com.codeit.monew.user.exception.UserEmailDuplicatedException;
 import com.codeit.monew.user.exception.UserErrorCode;
+import com.codeit.monew.user.exception.UserLoginFailedException;
 import com.codeit.monew.user.exception.UserNotExistException;
 import com.codeit.monew.user.mapper.UserMapper;
 import com.codeit.monew.user.repository.UserRepository;
+import com.codeit.monew.user.request.UserLoginRequest;
 import com.codeit.monew.user.request.UserRegisterRequest;
 import com.codeit.monew.user.request.UserUpdateRequest;
 import com.codeit.monew.user.response_dto.UserDto;
@@ -44,10 +46,27 @@ public class UserService {
     return userMapper.toDto(userRepository.save(user));
   }
 
+  public UserDto login(UserLoginRequest userLoginRequest) {
+    User user = userRepository.findByEmail(userLoginRequest.email())
+        .orElseThrow(() -> new UserLoginFailedException(UserErrorCode.USER_LOGIN_FAILED));
+
+    String loginPassword = userLoginRequest.password();
+
+    if(matches(loginPassword, user.getPassword())) {
+      throw new UserLoginFailedException(UserErrorCode.USER_LOGIN_FAILED);
+    }
+
+    return userMapper.toDto(user);
+  }
+
   private void validateEmailDoesNotExist(String email) {
     if (userRepository.existsByEmail(email)) {
-      throw new UserEmailDuplicatedException(UserErrorCode.USER_EMAIL_DUPLICATED, email);
+      throw new UserEmailDuplicatedException(UserErrorCode.USER_EMAIL_DUPLICATED_EXCEPTION, email);
     }
+  }
+
+  private boolean matches(String plainPassword, String hashedPassword) {
+    return BCrypt.verifyer().verify(plainPassword.toCharArray(), hashedPassword).verified;
   }
 
 }
