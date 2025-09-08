@@ -7,6 +7,7 @@ public record UserArticleViewDto(
   UUID id,
   UUID viewedBy,
   LocalDateTime createdAt,
+  UUID articleId,
   String source,
   String sourceUrl,
   String articleTitle,

@@ -12,7 +12,6 @@ import com.codeit.monew.comment.entity.QCommentLike;
 import com.codeit.monew.interest.entity.QInterest;
 import com.codeit.monew.interest.entity.QKeyword;
 import com.codeit.monew.subscriptions.entity.QSubscription;
-import com.codeit.monew.user.entity.QUser;
 import com.codeit.monew.user.entity.User;
 import com.codeit.monew.user.entity.UserStatus;
 import com.codeit.monew.user.exception.UserErrorCode;
@@ -21,7 +20,9 @@ import com.codeit.monew.user.repository.UserRepository;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -68,24 +69,35 @@ public class UserActivityService {
     QInterest interest = QInterest.interest;
     QKeyword keyword = QKeyword.keyword1;
 
-    return queryFactory
-        .select(Projections.constructor(UserSubscriptionDto.class,
-            subscription.id,
-            interest.id,
-            interest.name,
-            JPAExpressions
-                .select(keyword.keyword)
-                .from(keyword)
-                .where(
-                    keyword.interest.id.eq(interest.id)
-                ),
-            interest.subCount,
-            subscription.createdAt
-            )
-        ).from(subscription)
-        .leftJoin(interest).on(subscription.interest.id.eq(interest.id))
-        .where(subscription.user.id.eq(userId))
-        .fetch();
+    List<UserSubscriptionDto> userSubscriptionDtos = new ArrayList<>();
+
+    List<Tuple> interestTuples = queryFactory.select(subscription.id, interest.id, interest.name, interest.subCount, subscription.createdAt)
+        .from(subscription)
+        .where(
+            subscription.user.id.eq(userId)
+        ).fetch();
+
+
+    for(Tuple interestTuple : interestTuples) {
+      UUID interestId = interestTuple.get(interest.id);
+      List<String> keywords =queryFactory.select(
+          keyword.keyword
+      ).from(keyword)
+          .where(
+              keyword.interest.id.eq(interestId)
+          ).fetch();
+
+      userSubscriptionDtos.add(new UserSubscriptionDto(
+          interestTuple.get(subscription.id),
+          interestTuple.get(interest.id),
+          interestTuple.get(interest.name),
+          keywords,
+          Long.valueOf(interestTuple.get(interest.subCount)),
+          interestTuple.get(subscription.createdAt)
+      ));
+    }
+
+    return userSubscriptionDtos;
   }
 
   private List<CommentActivityDto> getRecentComments(UUID userId) {
@@ -100,7 +112,7 @@ public class UserActivityService {
             comment.user.id,                          //userId
             comment.user.nickname,                    //userNickname
             comment.content,                          //content
-            comment.likeCount,                        //likeCount
+            comment.likeCount.longValue(),            //likeCount, int -> long
             comment.createdAt                        //createdAt
             )).from(comment)
         .join(comment.article, article).on(comment.article.eq(article))
@@ -116,15 +128,16 @@ public class UserActivityService {
 
     return queryFactory
         .select(Projections.constructor(CommentLikeActivityDto.class,
-            commentLike.id,                           //id
-            commentLike.createdAt,                    //createdAt
-            commentLike.comment.id,                   //commentId
-            commentLike.comment.article.id,           //commentUserId
-            commentLike.comment.article.articleTitle, //commentUserTitle
-            commentLike.user.id,                      //commentUserId
-            commentLike.comment.content,              //commentContent
-            commentLike.comment.likeCount,            //commentLikeCount
-            commentLike.comment.createdAt            //commentCreatedAt
+            commentLike.id,                             //id
+            commentLike.createdAt,                      //createdAt
+            commentLike.comment.id,                     //commentId
+            commentLike.comment.article.id,             //commentUserId
+            commentLike.comment.article.articleTitle,   //commentUserTitle
+            commentLike.user.id,                        //commentUserId
+            commentLike.user.nickname,                  //commentUserNickname
+            commentLike.comment.content,                //commentContent
+            commentLike.comment.likeCount.longValue(),  //commentLikeCount int -> long
+            commentLike.comment.createdAt               //commentCreatedAt
             )).from(commentLike)
         .join(commentLike.comment, comment).on(commentLike.comment.id.eq(comment.id))
         .where(commentLike.user.id.eq(userId))
