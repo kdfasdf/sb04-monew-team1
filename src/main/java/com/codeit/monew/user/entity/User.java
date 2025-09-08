@@ -80,4 +80,36 @@ public class User extends BaseUpdatableEntity {
   public void updateDeletedAt(LocalDateTime deletedAt) {
     this.deletedAt = deletedAt;
   }
+
+  public void addSubscription(Subscription subscription) {
+    subscriptions.add(subscription);
+  }
+
+  public void removeSubscription(Subscription subscription) {
+    subscriptions.remove(subscription);
+  }
+
+  public void addComment(Comment comment) {
+    comments.add(comment);
+  }
+
+  public void removeComment(Comment comment) {
+    comments.remove(comment);
+  }
+
+  public void addCommentLike(CommentLike commentLike) {
+    commentLikes.add(commentLike);
+  }
+
+  public void removeCommentLike(CommentLike commentLike) {
+    commentLikes.remove(commentLike);
+  }
+
+  public void addArticlesViewUser(ArticlesViewUser articlesViewUser) {
+    articlesViewUsers.add(articlesViewUser);
+  }
+
+  public void removeArticlesViewUser(ArticlesViewUser articlesViewUser) {
+    articlesViewUsers.remove(articlesViewUser);
+  }
 }

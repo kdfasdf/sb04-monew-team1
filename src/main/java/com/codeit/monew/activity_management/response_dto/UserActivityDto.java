@@ -11,10 +11,10 @@ public record UserActivityDto(
   String email,
   String nickname,
   LocalDateTime createdAt,
-  List<SubscriptionDto> subscriptions,
+  List<UserSubscriptionDto> subscriptions,
   List<CommentActivityDto> comments,
   List<CommentLikeActivityDto> commentLikes,
-  List<ArticleViewDto> articleViews
+  List<UserArticleViewDto> articleViews
 ) {
 
 }
