@@ -19,14 +19,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "users")
 @Getter
-@Builder
+@SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor()
 public class User extends BaseUpdatableEntity {
@@ -60,4 +60,56 @@ public class User extends BaseUpdatableEntity {
 
   @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, fetch = FetchType.LAZY, orphanRemoval = true)
   private List<ArticlesViewUser> articlesViewUsers;
+
+  public void updateEmail(String email) {
+    this.email = email;
+  }
+
+  public void updateNickname(String nickname) {
+    this.nickname = nickname;
+  }
+
+  public void updatePassword(String password) {
+    this.password = password;
+  }
+
+  public void updateUserStatus(UserStatus userStatus) {
+    this.userStatus = userStatus;
+  }
+
+  public void updateDeletedAt(LocalDateTime deletedAt) {
+    this.deletedAt = deletedAt;
+  }
+
+  public void addSubscription(Subscription subscription) {
+    subscriptions.add(subscription);
+  }
+
+  public void removeSubscription(Subscription subscription) {
+    subscriptions.remove(subscription);
+  }
+
+  public void addComment(Comment comment) {
+    comments.add(comment);
+  }
+
+  public void removeComment(Comment comment) {
+    comments.remove(comment);
+  }
+
+  public void addCommentLike(CommentLike commentLike) {
+    commentLikes.add(commentLike);
+  }
+
+  public void removeCommentLike(CommentLike commentLike) {
+    commentLikes.remove(commentLike);
+  }
+
+  public void addArticlesViewUser(ArticlesViewUser articlesViewUser) {
+    articlesViewUsers.add(articlesViewUser);
+  }
+
+  public void removeArticlesViewUser(ArticlesViewUser articlesViewUser) {
+    articlesViewUsers.remove(articlesViewUser);
+  }
 }
